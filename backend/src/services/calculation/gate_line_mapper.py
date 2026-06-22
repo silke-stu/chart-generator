@@ -21,7 +21,7 @@ def ecliptic_to_gate_line(longitude: float) -> tuple[int, int]:
     """
     # HD wheel starts at 58° in tropical zodiac
     # Adjust longitude to HD wheel starting point
-    adjusted = (longitude - 58.0) % 360.0
+    adjusted = (longitude + 58.0) % 360.0
 
     # Each gate is 5.625 degrees
     gate_number = int(adjusted / 5.625) + 1

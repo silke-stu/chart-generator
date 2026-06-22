@@ -12,6 +12,8 @@ class ChartRequest(BaseModel):
     birthTime: Optional[str] = Field(None, description="Format: HH:MM")
     birthTimeApproximate: bool = Field(default=False)
     birthPlace: str = Field(..., min_length=2, max_length=200)
+    latitude: Optional[float] = Field(None, ge=-90, le=90)
+    longitude: Optional[float] = Field(None, ge=-180, le=180)
 
     @validator("birthTime")
     def validate_birth_time_presence(cls, v, values):
@@ -60,6 +62,7 @@ class Center(BaseModel):
     name: str
     code: str
     defined: bool
+    definitionType: str = "open"  # "open" | "defined" | "unconscious"
 
 
 class Channel(BaseModel):

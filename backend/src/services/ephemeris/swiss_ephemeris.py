@@ -22,9 +22,9 @@ class SwissEphemerisSource:
         CelestialBody.URANUS: swe.URANUS,
         CelestialBody.NEPTUNE: swe.NEPTUNE,
         CelestialBody.PLUTO: swe.PLUTO,
-        CelestialBody.NORTH_NODE: swe.TRUE_NODE,
+        CelestialBody.NORTH_NODE: swe.MEAN_NODE,
         # Earth is calculated as Sun + 180°
-        # South Node is North Node + 180°
+        # South Node is calculated as North Node + 180°
     }
 
     def __init__(self):

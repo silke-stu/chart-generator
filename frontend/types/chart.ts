@@ -8,6 +8,8 @@ export interface ChartRequest {
   birthTime: string; // Format: HH:MM
   birthTimeApproximate: boolean;
   birthPlace: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface TypeInfo {
@@ -27,10 +29,13 @@ export interface ProfileInfo {
   shortDescription: string;
 }
 
+export type CenterDefinitionType = "open" | "defined" | "unconscious";
+
 export interface Center {
   name: string;
   code: string;
   defined: boolean;
+  definitionType: CenterDefinitionType;
 }
 
 export interface Channel {

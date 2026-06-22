@@ -6,7 +6,7 @@ Tests email service, handler, and database integration.
 
 import pytest
 import uuid
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from sqlalchemy import create_engine, String, DateTime, Boolean, Text, Column
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -163,7 +163,7 @@ class TestEmailService:
         record = db_session.query(LeadEmailDB).filter_by(
             id=result["id"]
         ).first()
-        record.deleted_at = datetime.now(UTC)
+        record.deleted_at = datetime.now(timezone.utc)
         db_session.commit()
 
         # Check duplicate should return False

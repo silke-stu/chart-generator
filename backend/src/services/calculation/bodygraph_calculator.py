@@ -117,20 +117,26 @@ class BodygraphCalculator:
         if p_sun is None or d_sun is None:
             raise ValueError("Sun position required for bodygraph calculation")
 
-        p_earth_long = (p_sun.ecliptic_longitude + 180.0) % 360.0
-        d_earth_long = (d_sun.ecliptic_longitude + 180.0) % 360.0
+        # Earth gate comes from the positions list (already computed as Sun+180° by the ephemeris source)
+        p_earth_pos = next((p for p in personality_positions if p.body == CelestialBody.EARTH), None)
+        d_earth_pos = next((p for p in design_positions if p.body == CelestialBody.EARTH), None)
 
-        p_earth_gate, p_earth_line = ecliptic_to_gate_line(p_earth_long)
-        d_earth_gate, d_earth_line = ecliptic_to_gate_line(d_earth_long)
+        if p_earth_pos is None or d_earth_pos is None:
+            raise ValueError("Earth position required for incarnation cross calculation")
 
-        conscious_gates.add(p_earth_gate)
-        unconscious_gates.add(d_earth_gate)
+        p_earth_gate, p_earth_line = p_earth_pos.gate, p_earth_pos.line
+        d_earth_gate, d_earth_line = d_earth_pos.gate, d_earth_pos.line
 
         all_active_gates = conscious_gates.union(unconscious_gates)
 
         # 2. Determine Defined Channels
         defined_channels = []
         defined_centers_set = set()
+        # Centers that have at least one defining channel involving a
+        # Personality (conscious) gate - i.e. "normally" defined, vs.
+        # centers whose definition comes exclusively from Design
+        # (unconscious) gates ("unbewusst definiert").
+        consciously_defined_centers_set = set()
 
         # Helper to check if channel is defined
         active_channels_map = {}  # Store defined channels for type calc
@@ -144,10 +150,23 @@ class BodygraphCalculator:
                 unique_channels.add(gate_pair)
 
                 if g1 in all_active_gates and g2 in all_active_gates:
-                    code = f"{g1}-{g2}"
+                    lo, hi = sorted((g1, g2))
+                    code = f"{lo}-{hi}"
                     defined_channels.append(Channel(code=code))
                     defined_centers_set.add(c1)
                     defined_centers_set.add(c2)
+
+                    # A channel counts as "consciously" involved if either
+                    # of its two gates is activated via the Personality
+                    # (birth/conscious) side. If both gates are active only
+                    # via the Design (unconscious) side, the channel - and
+                    # the centers it connects - is purely unconscious.
+                    channel_is_conscious = (
+                        g1 in conscious_gates or g2 in conscious_gates
+                    )
+                    if channel_is_conscious:
+                        consciously_defined_centers_set.add(c1)
+                        consciously_defined_centers_set.add(c2)
 
                     # Store for type calculation
                     active_channels_map[gate_pair] = (c1, c2)
@@ -167,8 +186,21 @@ class BodygraphCalculator:
         }
 
         for code, name in center_names.items():
+            is_defined = code in defined_centers_set
+            if not is_defined:
+                definition_type = "open"
+            elif code in consciously_defined_centers_set:
+                definition_type = "defined"
+            else:
+                definition_type = "unconscious"
+
             centers.append(
-                Center(name=name, code=code, defined=code in defined_centers_set)
+                Center(
+                    name=name,
+                    code=code,
+                    defined=is_defined,
+                    definitionType=definition_type,
+                )
             )
 
         # 4. Determine Type & Authority
@@ -198,11 +230,9 @@ class BodygraphCalculator:
         # Usually gates list is just a list of active gates, or grouped by planet.
         # The ChartResponse expects dict with "conscious" and "unconscious" lists of strings "gate.line"
 
+        # All 13 bodies (incl. Earth + South Node) are already in the positions lists
         c_gates_list = [f"{p.gate}.{p.line}" for p in personality_positions]
-        c_gates_list.append(f"{p_earth_gate}.{p_earth_line}")  # Add Earth
-
         u_gates_list = [f"{p.gate}.{p.line}" for p in design_positions]
-        u_gates_list.append(f"{d_earth_gate}.{d_earth_line}")  # Add Earth
 
         gates = {"conscious": c_gates_list, "unconscious": u_gates_list}
 

@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "/Users/silkina/.nvm/versions/node/v24.17.0/bin/npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "frontend",
+      "env": {
+        "PATH": "/Users/silkina/.nvm/versions/node/v24.17.0/bin:/usr/bin:/bin"
+      },
+      "port": 3000,
+      "autoPort": false
+    }
+  ]
+}

@@ -20,13 +20,31 @@ export default function Bodygraph({ centers, channels }: BodygraphProps) {
     root: { x: 200, y: 480, width: 80, height: 50 },
   };
 
+  // Color palette taken from the "Human Design Advisor" Canva layout:
+  // white/outline = open, olive = consciously defined, beige = unconsciously
+  // (Design-only) defined.
+  const FILL_BY_STATE: Record<string, string> = {
+    open: "#FFFFFF",
+    defined: "#8C7330",
+    unconscious: "#D9CDB0",
+  };
+
+  const STROKE_BY_STATE: Record<string, string> = {
+    open: "#C7C7C7",
+    defined: "#8C7330",
+    unconscious: "#C9B98E",
+  };
+
+  const getCenter = (code: string) => centers.find((c) => c.code === code);
+
   const getCenterFill = (code: string): string => {
-    const center = centers.find((c) => c.code === code);
-    return center?.defined ? "#2C3E50" : "white";
+    const center = getCenter(code);
+    return FILL_BY_STATE[center?.definitionType ?? "open"];
   };
 
   const getCenterStroke = (code: string): string => {
-    return "#2C3E50";
+    const center = getCenter(code);
+    return STROKE_BY_STATE[center?.definitionType ?? "open"];
   };
 
   return (
@@ -48,7 +66,7 @@ export default function Bodygraph({ centers, channels }: BodygraphProps) {
                 y1={100 + index * 50}
                 x2={240}
                 y2={150 + index * 50}
-                stroke="#8B95A5"
+                stroke="#B0AFA9"
                 strokeWidth="3"
                 opacity="0.6"
               />
@@ -155,8 +173,28 @@ export default function Bodygraph({ centers, channels }: BodygraphProps) {
           })}
         </svg>
       </div>
-      <div className="mt-4 text-center text-sm text-secondary">
-        <p>Gefärbte Zentren sind definiert, weiße Zentren sind offen</p>
+      <div className="mt-4 flex flex-wrap justify-center gap-4 text-sm text-secondary">
+        <span className="flex items-center gap-2">
+          <span
+            className="inline-block w-3 h-3 rounded-sm border"
+            style={{ backgroundColor: FILL_BY_STATE.defined, borderColor: STROKE_BY_STATE.defined }}
+          />
+          {LABELS.defined}
+        </span>
+        <span className="flex items-center gap-2">
+          <span
+            className="inline-block w-3 h-3 rounded-sm border"
+            style={{ backgroundColor: FILL_BY_STATE.unconscious, borderColor: STROKE_BY_STATE.unconscious }}
+          />
+          {LABELS.unconsciouslyDefined}
+        </span>
+        <span className="flex items-center gap-2">
+          <span
+            className="inline-block w-3 h-3 rounded-sm border"
+            style={{ backgroundColor: FILL_BY_STATE.open, borderColor: STROKE_BY_STATE.open }}
+          />
+          {LABELS.open}
+        </span>
       </div>
     </div>
   );

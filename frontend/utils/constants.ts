@@ -25,6 +25,7 @@ export const LABELS = {
   // Center labels
   defined: "Definiert",
   open: "Offen",
+  unconsciouslyDefined: "Unbewusst definiert",
 
   // Gate labels
   conscious: "Bewusst",

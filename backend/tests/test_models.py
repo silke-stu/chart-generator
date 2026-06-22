@@ -135,11 +135,12 @@ class TestCenter:
 
     def test_defined_center(self):
         """Test defined center"""
-        center = Center(name="Sacral", code="sacral", defined=True)
+        center = Center(name="Sacral", code="sacral", defined=True, definitionType="defined")
 
         assert center.name == "Sacral"
         assert center.code == "sacral"
         assert center.defined is True
+        assert center.definitionType == "defined"
 
     def test_undefined_center(self):
         """Test undefined center"""
@@ -147,3 +148,11 @@ class TestCenter:
 
         assert center.name == "Ego"
         assert center.defined is False
+        assert center.definitionType == "open"
+
+    def test_unconsciously_defined_center(self):
+        """Test center defined exclusively via Design (unconscious) gates"""
+        center = Center(name="Spleen", code="spleen", defined=True, definitionType="unconscious")
+
+        assert center.defined is True
+        assert center.definitionType == "unconscious"

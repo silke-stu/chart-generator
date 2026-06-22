@@ -77,7 +77,7 @@ class PositionCalculator:
         """
         # HD wheel starts at 58° in tropical zodiac
         # Adjust longitude to HD wheel starting point
-        adjusted = (longitude - 58.0) % 360.0
+        adjusted = (longitude + 58.0) % 360.0
 
         # Each gate is 5.625 degrees
         gate_number = int(adjusted / 5.625) + 1
@@ -87,6 +87,8 @@ class PositionCalculator:
 
         # Each line is 0.9375 degrees
         line_number = int(position_in_gate / 0.9375) + 1
+        if line_number > 6:
+            line_number = 6
 
         # Map to actual HD gate sequence (wheel order)
         gate = self._map_to_hd_gate(gate_number)

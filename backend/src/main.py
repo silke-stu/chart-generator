@@ -138,16 +138,29 @@ async def generate_chart(request: Request, chart_request: ChartRequest):
         if not is_valid:
             raise ValidationError("birthTime", error_msg)
 
-        # 1. Geocode birth place
-        lat, lng, tz_str = geocoding_service.get_location_data(chart_request.birthPlace)
-        if not lat or not lng or not tz_str:
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "field": "birthPlace",
-                    "error": "Ort nicht gefunden. Bitte prüfen Sie die Eingabe.",
-                },
-            )
+        # 1. Resolve coordinates and timezone
+        if chart_request.latitude is not None and chart_request.longitude is not None:
+            lat = chart_request.latitude
+            lng = chart_request.longitude
+            tz_str = geocoding_service.get_timezone_from_coords(lat, lng)
+            if not tz_str:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "field": "birthPlace",
+                        "error": "Zeitzone für den angegebenen Ort nicht gefunden.",
+                    },
+                )
+        else:
+            lat, lng, tz_str = geocoding_service.get_location_data(chart_request.birthPlace)
+            if not lat or not lng or not tz_str:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "field": "birthPlace",
+                        "error": "Ort nicht gefunden. Bitte prüfen Sie die Eingabe.",
+                    },
+                )
 
         # 2. Parse datetime
         try:

@@ -57,3 +57,9 @@ class GeocodingService:
         except Exception as e:
             print(f"Geocoding error: {e}")
             return None, None, None
+
+    def get_timezone_from_coords(
+        self, lat: float, lng: float
+    ) -> Optional[str]:
+        """Look up timezone string from coordinates."""
+        return self.tf.timezone_at(lng=lng, lat=lat)
