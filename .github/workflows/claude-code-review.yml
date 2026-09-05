@@ -6,6 +6,9 @@ on:
     branches:
       - main
       - 'feature/**'
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -47,7 +50,7 @@ jobs:
           fi
 
       - name: Claude Code Review
-        if: steps.check-key.outputs.api_key_exists == 'true'
+        if: github.event_name == 'pull_request' && steps.check-key.outputs.api_key_exists == 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +62,7 @@ jobs:
           python .github/scripts/claude_review.py
 
       - name: API Key Missing Notice
-        if: steps.check-key.outputs.api_key_exists == 'false'
+        if: github.event_name == 'pull_request' && steps.check-key.outputs.api_key_exists == 'false'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -135,7 +138,7 @@ jobs:
           fi
 
       - name: Post review summary
-        if: steps.check-key.outputs.api_key_exists == 'true'
+        if: github.event_name == 'pull_request' && steps.check-key.outputs.api_key_exists == 'true'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
