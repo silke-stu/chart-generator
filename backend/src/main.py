@@ -37,6 +37,9 @@ load_dotenv()
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+# Simple in-memory chart counter (resets on server restart/redeploy)
+chart_count = 0
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Human Design Chart Generator API",
@@ -46,6 +49,19 @@ app = FastAPI(
 
 # Add rate limiter to app state
 app.state.limiter = limiter
+
+
+# Middleware: count successful chart generations
+@app.middleware("http")
+async def count_chart_requests(request: Request, call_next):
+    global chart_count
+    response = await call_next(request)
+    if (request.url.path == "/api/hd-chart"
+            and request.method == "POST"
+            and response.status_code == 200):
+        chart_count += 1
+    return response
+
 
 # Initialize database tables on startup
 @app.on_event("startup")
@@ -406,6 +422,18 @@ async def export_leads(token: str = ""):
     finally:
         if db_session:
             db_session.close()
+
+
+@app.get("/api/admin/stats")
+async def get_stats(token: str = ""):
+    """Chart generation counter. Protected by ADMIN_TOKEN."""
+    admin_token = os.getenv("ADMIN_TOKEN", "")
+    if not admin_token or token != admin_token:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return {
+        "charts_generated": chart_count,
+        "note": "Zähler wird bei Server-Neustart / Redeploy zurückgesetzt",
+    }
 
 
 @app.exception_handler(RateLimitExceeded)
